@@ -21,6 +21,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -108,6 +110,26 @@ public class UserService {
             response.put("message", "잘못된 자격 증명입니다");
             response.put("http_status", HttpStatus.UNAUTHORIZED.toString());
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+        }
+    }
+
+    public void withdrawalUser(String loginEmail, String password) {
+        UserEntity userEntity = userRepository.findByEmail(loginEmail).orElseThrow(
+                () -> new AppException(ErrorCode.USER_EMAIL_NOT_FOUND, ErrorCode.USER_EMAIL_NOT_FOUND.getMessage())
+        );
+
+        String encodedPassword = passwordEncoder.encode(password);
+        String userEntityPassword = userEntity.getPassword();
+        log.info("암호화된 비밀번호: {}", encodedPassword);
+        log.info("userEntity에서 가져온 비밀번호: {}", userEntityPassword);
+        Date now = new Date();
+        LocalDateTime localDateTime = now.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+
+        if (!passwordEncoder.matches(encodedPassword, userEntityPassword)) {
+            throw new AppException(ErrorCode.NOT_EQUAL_PASSWORD, ErrorCode.NOT_EQUAL_PASSWORD.getMessage());
+        } else {
+            userEntity.setDeletedAt(localDateTime);
+            UserEntity deletedUser = userRepository.save(userEntity);
         }
     }
 }
