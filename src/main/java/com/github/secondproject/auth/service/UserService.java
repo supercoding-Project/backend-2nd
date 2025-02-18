@@ -4,10 +4,12 @@ import com.github.secondproject.auth.dto.LoginDto;
 import com.github.secondproject.auth.dto.SignUpDto;
 import com.github.secondproject.auth.entity.Role;
 import com.github.secondproject.auth.entity.UserEntity;
+import com.github.secondproject.auth.entity.UserStatus;
 import com.github.secondproject.auth.repository.UserRepository;
 import com.github.secondproject.global.config.auth.JwtTokenProvider;
 import com.github.secondproject.global.exception.AppException;
 import com.github.secondproject.global.exception.ErrorCode;
+import com.github.secondproject.global.util.PasswordUtil;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -16,21 +18,24 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
+    private final PasswordUtil passwordUtil = new PasswordUtil();
 
     @Transactional
     public void signUp(SignUpDto signUpDto) throws Exception{
@@ -46,12 +51,13 @@ public class UserService {
 
         UserEntity userEntity = UserEntity.builder()
                 .email(signUpDto.getEmail())
-                .password(passwordEncoder.encode(signUpDto.getPassword()))
+                .password(passwordUtil.encrypt(signUpDto.getPassword()))
                 .username(signUpDto.getUsername())
                 .address(signUpDto.getAddress())
                 .phone(signUpDto.getPhone())
                 .gender(signUpDto.getGender())
                 .role(Role.ROLE_USER)
+                .status(UserStatus.ACTIVE)
                 .createdAt(LocalDateTime.now())
                 .build();
 
@@ -74,7 +80,7 @@ public class UserService {
         try {
             UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(loginDto.getEmail(), loginDto.getPassword());
 
-            if (!passwordEncoder.matches(loginDto.getPassword(), userEntity.getPassword())) {
+            if (!Objects.equals(passwordUtil.encrypt(loginDto.getPassword()), userEntity.getPassword())) {
                 throw new AppException(ErrorCode.NOT_EQUAL_PASSWORD, ErrorCode.NOT_EQUAL_PASSWORD.getMessage());
             }
 
@@ -108,6 +114,36 @@ public class UserService {
             response.put("message", "잘못된 자격 증명입니다");
             response.put("http_status", HttpStatus.UNAUTHORIZED.toString());
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void withdrawalUser(String loginEmail, String requestBodyPassword) throws NoSuchAlgorithmException {
+        UserEntity userEntity = userRepository.findByEmail(loginEmail).orElseThrow(
+                () -> new AppException(ErrorCode.USER_EMAIL_NOT_FOUND, ErrorCode.USER_EMAIL_NOT_FOUND.getMessage())
+        );
+
+        String encodedPassword = passwordUtil.encrypt(requestBodyPassword);
+        String userEntityPassword = userEntity.getPassword();
+        log.info("암호화된 비밀번호: {}", encodedPassword);
+        log.info("userEntity에서 가져온 비밀번호: {}", userEntityPassword);
+        Date now = new Date();
+        LocalDateTime localDateTime = now.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+
+        if (!Objects.equals(encodedPassword, userEntityPassword)) {
+            throw new AppException(ErrorCode.NOT_EQUAL_PASSWORD, ErrorCode.NOT_EQUAL_PASSWORD.getMessage());
+        } else {
+            userEntity.setEmail("");
+            userEntity.setPassword("");
+            userEntity.setUsername("삭제한 회원");
+            userEntity.setAddress("");
+            userEntity.setPhone("");
+            userEntity.setGender("");
+            userEntity.setStatus(UserStatus.DELETED);
+            userEntity.setDeletedAt(localDateTime);
+            UserEntity deletedUser = userRepository.save(userEntity);
         }
     }
 }

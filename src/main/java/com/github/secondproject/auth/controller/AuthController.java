@@ -1,7 +1,9 @@
 package com.github.secondproject.auth.controller;
 import com.github.secondproject.auth.dto.LoginDto;
 import com.github.secondproject.auth.dto.SignUpDto;
+import com.github.secondproject.auth.entity.UserEntity;
 import com.github.secondproject.auth.service.UserService;
+import com.github.secondproject.global.config.auth.custom.CustomUserDetails;
 import com.github.secondproject.global.dto.MsgResponseDto;
 import com.github.secondproject.global.exception.ErrorCode;
 import io.swagger.v3.oas.annotations.Operation;
@@ -11,11 +13,15 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.security.NoSuchAlgorithmException;
+import java.util.Map;
+import java.util.Objects;
 
 @Slf4j
 @RestController
@@ -24,6 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
     private final UserService userService;
+    private final PasswordEncoder passwordEncoder;
 
     // 회원가입
     @Operation(summary = "유저 회원가입", description = "회원가입 api 입니다.")
@@ -49,4 +56,13 @@ public class AuthController {
         return userService.login(loginDto, httpServletResponse);
     }
 
+    // 회원탈퇴
+    @PutMapping("/v1/withdrawal")
+    public ResponseEntity<?> withdrawalUser(@RequestBody Map<String, String> passwordMap, @AuthenticationPrincipal CustomUserDetails customUserDetails) throws NoSuchAlgorithmException {
+        String loginEmail = customUserDetails.getUsername();
+        String requestBodyPassword = passwordMap.get("password");
+
+        userService.withdrawalUser(loginEmail, requestBodyPassword);
+        return ResponseEntity.ok(new MsgResponseDto("회원탈퇴가 완료되었습니다.", HttpStatus.OK.value()));
+    }
 }
