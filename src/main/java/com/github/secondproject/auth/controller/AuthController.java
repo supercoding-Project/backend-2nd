@@ -19,6 +19,8 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.NoSuchAlgorithmException;
+import java.util.Map;
 import java.util.Objects;
 
 @Slf4j
@@ -56,10 +58,11 @@ public class AuthController {
 
     // 회원탈퇴
     @PutMapping("/v1/withdrawal")
-    public ResponseEntity<?> withdrawalUser(@RequestParam String password, @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+    public ResponseEntity<?> withdrawalUser(@RequestBody Map<String, String> passwordMap, @AuthenticationPrincipal CustomUserDetails customUserDetails) throws NoSuchAlgorithmException {
         String loginEmail = customUserDetails.getUsername();
+        String requestBodyPassword = passwordMap.get("password");
 
-        userService.withdrawalUser(loginEmail, password);
+        userService.withdrawalUser(loginEmail, requestBodyPassword);
         return ResponseEntity.ok(new MsgResponseDto("회원탈퇴가 완료되었습니다.", HttpStatus.OK.value()));
     }
 }
