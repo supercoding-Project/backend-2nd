@@ -1,7 +1,6 @@
 package com.github.secondproject.product.entity;
 
 import com.github.secondproject.auth.entity.UserEntity;
-import com.github.secondproject.product.dto.ProductStatus;
 import jakarta.persistence.*;
 
 import java.util.Date;
@@ -10,45 +9,46 @@ import java.util.Date;
 @Table(name = "product")
 public class ProductEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // 자동으로 ID 생성
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name="product_id",nullable = false)
+    private Long productId;
 
-    @Column(nullable = false)
+    @Column(name="title",nullable = false)
     private String title;  // 도서명
 
-    @Column(nullable = false)
+    @Column(name="author",nullable = false)
     private String author; // 저자
 
-    @Column(nullable = false)
+    @Column(name="publisher",nullable = false)
     private String publisher; // 출판사
 
-    @Column(nullable = false)
-    private Double originalPrice; // 정가
+    @Column(name="original_price",nullable = false)
+    private Double originalPrice;
 
-    @Column(nullable = false)
-    private Double salePrice; // 판매가
+    @Column(name="sale_price",nullable = false)
+    private Double salePrice;
 
-    @Column(length = 1000)
-    private String description; // 설명
+    @Column(name="description",length = 1000)
+    private String description;
 
-    @Column(nullable = false)
-    private Integer stockQuantity; // 수량
+    @Column(name="stock_quantity",nullable = false)
+    private Integer stockQuantity;
 
-    @Column(nullable = false)
-    private Date publishDate; // 출간일
+    @Column(name="publish_date",nullable = false)
+    private Date publishDate;
 
-    @Column(nullable = false)
-    private Date startedAt; // 상품 등록일
+    @Column(name="started_at",nullable = false)
+    private Date startedAt;
 
-    @Column(nullable = false)
-    private Date terminatedAt; // 판매종료일
+    @Column(name="terminated_at",nullable = false)
+    private Date terminatedAt;
 
-    @Column(nullable = false)
-    private String imageUrl; // 도서 이미지 URL
+    @Column(name="image_url",nullable = false)
+    private String imageUrl;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private ProductStatus status; // 도서 상태
+    @Column(name = "status" ,nullable = false)
+    private ProductStatus status;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
