@@ -1,0 +1,29 @@
+# IDE 설정 파일 (IntelliJ, Eclipse, VS Code 등)
+.idea/
+.vscode/
+*.iml
+.classpath
+.project
+.settings/
+
+# Maven / Gradle 빌드 파일
+target/
+build/
+
+# 로그 파일
+logs/
+*.log
+
+# 환경 설정 파일 (보안 위험 방지)
+.env
+application.properties
+application.yml
+
+# OS 관련 파일
+.DS_Store
+Thumbs.db
+
+# Git이 관리하지 않아야 할 파일
+*.jar
+*.war
+*.class
