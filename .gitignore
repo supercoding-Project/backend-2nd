@@ -1,0 +1,20 @@
+# IDE 설정 파일
+.idea/
+.vscode/
+*.iml
+
+# 빌드 파일
+target/
+build/
+
+# 로그 및 환경 설정 파일
+logs/
+*.log
+.env
+application.properties
+application.yml
+
+# OS 관련 파일
+.DS_Store
+Thumbs.db
+
