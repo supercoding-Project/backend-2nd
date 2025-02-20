@@ -1,5 +1,6 @@
 package com.github.secondproject.cart.entity;
 
+import com.github.secondproject.product.entity.ProductEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Fetch;

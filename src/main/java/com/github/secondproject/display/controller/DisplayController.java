@@ -1,10 +1,13 @@
 package com.github.secondproject.display.controller;
 
 import com.github.secondproject.display.service.DisplayService;
+import com.github.secondproject.product.entity.ProductEntity;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,9 +22,9 @@ public class DisplayController {
     // 전체 물품 조회
     @Operation(summary = "전체 상품 조회")
     @GetMapping("/all")
-    public ResponseEntity<?> getAllProduct() {
-        List<ProductEntity> response = displayService.getAllProducts();
-        return ResponseEntity.ok(response);
+    public Page<ProductEntity> getAllProduct(Pageable pageable) {
+        Page<ProductEntity> response = displayService.getAllProducts(pageable);
+        return response;
     }
 
     // 물품 상세 조회
@@ -29,7 +32,7 @@ public class DisplayController {
     @PostMapping("/{product_id}")
     public ResponseEntity<?> getProductDetail(
             @Parameter(name = "product_id", description = "상품 ID", example = "1")
-            @PathVariable("product_id") Long productId ) {
+            @PathVariable("product_id") Integer productId ) {
         ProductEntity response = displayService.getProduct(productId);
 
         return ResponseEntity.ok(response);
