@@ -4,7 +4,9 @@ import com.github.secondproject.auth.dto.LoginDto;
 import com.github.secondproject.auth.dto.SignUpDto;
 import com.github.secondproject.auth.entity.Role;
 import com.github.secondproject.auth.entity.UserEntity;
+import com.github.secondproject.auth.entity.UserImageEntity;
 import com.github.secondproject.auth.entity.UserStatus;
+import com.github.secondproject.auth.repository.UserImageRepository;
 import com.github.secondproject.auth.repository.UserRepository;
 import com.github.secondproject.global.config.auth.JwtTokenProvider;
 import com.github.secondproject.global.exception.AppException;
@@ -34,6 +36,7 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
+    private final UserImageRepository userImageRepository;
     private final JwtTokenProvider jwtTokenProvider;
     private final PasswordUtil passwordUtil = new PasswordUtil();
 
@@ -56,12 +59,19 @@ public class UserService {
                 .address(signUpDto.getAddress())
                 .phone(signUpDto.getPhone())
                 .gender(signUpDto.getGender())
+                .budget(0)
                 .role(Role.ROLE_USER)
                 .status(UserStatus.ACTIVE)
                 .createdAt(LocalDateTime.now())
                 .build();
 
+        UserImageEntity userImageEntity = UserImageEntity.builder()
+                .url("/user-images/anonymous.png")
+                .userEntity(userEntity)
+                .build();
+
         userRepository.save(userEntity);
+        userImageRepository.save(userImageEntity);
     }
 
     @Transactional
