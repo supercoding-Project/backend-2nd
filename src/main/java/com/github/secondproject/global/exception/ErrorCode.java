@@ -23,6 +23,7 @@ public enum ErrorCode {
       
     // 상품 진열 에러코드
     NOT_FOUND_PRODUCT(HttpStatus.NOT_FOUND, "상품을 찾을 수 없습니다."),
+    NOT_FOUND_STATUS(HttpStatus.NOT_FOUND, "해당 상태값은 존재하지 않습니다."),
 
     ;
 

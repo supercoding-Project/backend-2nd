@@ -2,10 +2,16 @@ package com.github.secondproject.product.entity;
 
 import com.github.secondproject.auth.entity.UserEntity;
 import jakarta.persistence.*;
+import lombok.*;
 
 import java.util.Date;
 
 @Entity
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Table(name = "product")
 public class ProductEntity {
     @Id
