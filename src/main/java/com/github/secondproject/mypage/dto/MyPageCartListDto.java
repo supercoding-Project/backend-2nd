@@ -1,6 +1,5 @@
 package com.github.secondproject.mypage.dto;
 
-import com.github.secondproject.product.entity.ProductEntity;
 import lombok.*;
 
 import java.util.List;
@@ -12,5 +11,5 @@ import java.util.List;
 @ToString
 @Builder
 public class MyPageCartListDto {
-    private List<ProductEntity> cartList;
+    private List<CartEntity> cartList;
 }

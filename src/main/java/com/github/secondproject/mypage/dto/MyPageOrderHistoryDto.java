@@ -9,7 +9,6 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-@Builder
 public class MyPageOrderHistoryDto {
     private List<OrderEntity> orderHistory;
 }

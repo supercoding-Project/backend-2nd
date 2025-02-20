@@ -27,6 +27,7 @@ public class MyPageUserDto {
                 .aboutMe(myPageUserEntity.getAboutMe())
                 .address(userEntity.getAddress())
                 .phone(userEntity.getPhone())
+                .profileImageUrl(myPageUserEntity.getProfileImageUrl())
                 .build();
     }
 }

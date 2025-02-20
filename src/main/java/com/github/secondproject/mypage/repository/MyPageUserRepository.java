@@ -9,5 +9,5 @@ import java.util.Optional;
 
 @Repository
 public interface MyPageUserRepository extends JpaRepository<MyPageUserEntity, Long > {
-    Optional<MyPageUserEntity> findByUserEntity_UserId(Long userEntityUserId);
+    Optional<MyPageUserEntity> findByUserId(Long userId);
 }
