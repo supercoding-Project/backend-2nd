@@ -2,11 +2,11 @@
 .idea/
 .vscode/
 *.iml
-.gradle/
+#.gradle/
 
 # 빌드 파일
 target/
-build/
+#build/
 
 # 로그 및 환경 설정 파일
 logs/
