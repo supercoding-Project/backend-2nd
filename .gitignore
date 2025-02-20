@@ -1,21 +1,43 @@
-# IDE 설정 파일
-.idea/
-.vscode/
+HELP.md
+.gradle
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+bin/
+!**/src/main/**/bin/
+!**/src/test/**/bin/
+
+### IntelliJ IDEA ###
+.idea
+*.iws
 *.iml
-#.gradle/
+*.ipr
+out/
+!**/src/main/**/out/
+!**/src/test/**/out/
 
-# 빌드 파일
-target/
-#build/
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
 
-# 로그 및 환경 설정 파일
-logs/
-*.log
-.env
-application.properties
-application.yml
+### VS Code ###
+.vscode/
 
-# OS 관련 파일
-.DS_Store
-Thumbs.db
+
+## yaml 파일
+application-local.yaml
+src/main/resources/application-local.yaml
 
