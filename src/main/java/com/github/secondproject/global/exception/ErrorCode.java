@@ -21,12 +21,14 @@ public enum ErrorCode {
     CHECK_POST_ID(HttpStatus.NOT_FOUND, "게시물이 유효하지않습니다."),
     NOT_ACCEPT(HttpStatus.NOT_ACCEPTABLE, "해당 페이지에 오류가 발생했습니다."),
       
-    // 댓글 에러코드
-    NOT_ACCEPT_SAVE(HttpStatus.NOT_ACCEPTABLE,"저장이 완료 되지 않았습니다."),
-    NOT_FOUND_COMMENT(HttpStatus.NOT_FOUND,"해당 댓글을 찾을 수 없습니다."),
-    NOT_ACCEPT_CHANGE(HttpStatus.NOT_ACCEPTABLE,"변경이 완료 되지 않았습니다."),
-    NOT_EQUAL_USER(HttpStatus.BAD_REQUEST,"댓글 작성자가 아닙니다."),
-    NOT_ACCEPT_DELETE(HttpStatus.NOT_ACCEPTABLE,"댓글 삭제에 실패했습니다."),
+    // 상품 진열 에러코드
+    NOT_FOUND_PRODUCT(HttpStatus.NOT_FOUND, "상품을 찾을 수 없습니다."),
+
+
+    // 주문 에러코드
+    NOT_FOUND_USER(HttpStatus.NOT_FOUND, "해당 유저가 존재하지 않습니다. 유저 정보를 확인해주세요."),
+    CART_NOT_FOUND(HttpStatus.NOT_FOUND,"유저의 장바구니를 찾을 수 없습니다."),
+    CART_ITEM_NOT_SELECTED(HttpStatus.NOT_FOUND,"장바구니에서 선택된 상품이 없습니다. 상품을 선택해주세요.")
 
 
     ;

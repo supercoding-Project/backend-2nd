@@ -36,6 +36,9 @@ public class UserEntity {
     @Column(name = "gender", nullable = false)
     private String gender;
 
+    @Column(name = "budget", nullable = false)
+    private Integer budget;
+
     @Column(name = "role")
     @Enumerated(EnumType.STRING)
     private Role role;
@@ -49,4 +52,7 @@ public class UserEntity {
 
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
+
+    @OneToOne(mappedBy = "userEntity", cascade = CascadeType.ALL)
+    private UserImageEntity userImageEntity;
 }

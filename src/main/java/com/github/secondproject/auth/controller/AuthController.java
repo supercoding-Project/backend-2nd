@@ -18,6 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.security.NoSuchAlgorithmException;
 import java.util.Map;
@@ -35,16 +36,16 @@ public class AuthController {
     // 회원가입
     @Operation(summary = "유저 회원가입", description = "회원가입 api 입니다.")
     @PostMapping("/signup")
-    public ResponseEntity<?> signUp(@Valid @RequestBody SignUpDto signUpDto, BindingResult bindingResult) throws Exception{
-      log.info("[POST]: 회원가입 요청");
+    public ResponseEntity<?> signUp(@Valid @RequestPart(value = "dto") SignUpDto signUpDto, @RequestPart(value = "image") MultipartFile image, BindingResult bindingResult) throws Exception{
+        log.info("[POST]: 회원가입 요청");
 
-      if (bindingResult.hasErrors()) {
-          return ResponseEntity.badRequest().body(ErrorCode.BINDING_RESULT_ERROR.getMessage());
-      }
+        if (bindingResult.hasErrors()) {
+            return ResponseEntity.badRequest().body(ErrorCode.BINDING_RESULT_ERROR.getMessage());
+        }
 
-      userService.signUp(signUpDto);
+        userService.signUp(signUpDto, image);
 
-      return ResponseEntity.ok(new MsgResponseDto("회원가입이 완료되었습니다.", HttpStatus.OK.value()));
+        return ResponseEntity.ok(new MsgResponseDto("회원가입이 완료되었습니다.", HttpStatus.OK.value()));
     }
 
     // 로그인
