@@ -15,14 +15,14 @@ public class OrderResponse {
     private Integer orderId;
     private Timestamp orderDate;
     private String orderStatus;
-    private BigDecimal totalPrice;
+    private Integer totalPrice;
 
     public static OrderResponse from(OrderEntity order) {
         return OrderResponse.builder()
-                .orderId(order.getOrderId())
+                .orderId(order.getOrderId().intValue())
                 .orderDate(order.getOrderDate())
                 .orderStatus(order.getOrderStatus().name())
-                .totalPrice(order.getTotalPrice())
+                .totalPrice(order.getTotalPrice().intValue())
                 .build();
     }
 

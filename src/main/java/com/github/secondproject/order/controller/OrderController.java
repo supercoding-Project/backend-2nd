@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api")
+@RequestMapping("/api/v1")
 public class OrderController {
 
     private final OrderService orderService;
@@ -25,7 +25,7 @@ public class OrderController {
     @PostMapping("/order")
     public ResponseEntity<OrderResponse> createOrder (@RequestBody OrderRequestDTO orderRequestDTO,
                                                       @AuthenticationPrincipal CustomUserDetails customUserDetails) {
-        Integer userId = customUserDetails.getUserEntity().getUserId();
+        Long userId = customUserDetails.getUserEntity().getUserId();
         OrderEntity order = orderService.createOrder(userId,orderRequestDTO.getCartItemIds());
         OrderResponse orderResponse = OrderResponse.from(order);
         return ResponseEntity.ok(orderResponse);
