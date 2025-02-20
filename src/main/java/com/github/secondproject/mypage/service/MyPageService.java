@@ -3,12 +3,15 @@ package com.github.secondproject.mypage.service;
 import com.github.secondproject.auth.entity.UserEntity;
 import com.github.secondproject.auth.repository.UserRepository;
 import com.github.secondproject.cart.entity.CartEntity;
+import com.github.secondproject.cart.repository.CartRepository;
 import com.github.secondproject.global.exception.AppException;
 import com.github.secondproject.global.exception.ErrorCode;
 import com.github.secondproject.mypage.dto.MyPageCartListDto;
 import com.github.secondproject.mypage.dto.MyPageOrderHistoryDto;
 import com.github.secondproject.mypage.dto.MyPageUserDto;
 import com.github.secondproject.mypage.repository.MyPageUserRepository;
+import com.github.secondproject.order.entity.OrderEntity;
+import com.github.secondproject.order.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -17,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -68,12 +72,13 @@ public class MyPageService {
     @Transactional
     public List<MyPageCartListDto> getMyPageCartList(Long userId) {
         try {
-            List<CartEntity> cartEntityList = cartRepository.findByuserId(userId);
+            Optional<CartEntity> cartEntities = cartRepository.findByUserId(userId);
 
-            if(cartEntityList == null || cartEntityList.isEmpty()){
+            if(cartEntities.isEmpty()){
                 throw new AppException(ErrorCode.NOT_FOUND_CART_LIST,ErrorCode.NOT_FOUND_CART_LIST.getMessage());
             }
-            return List.of(new MyPageCartListDto(cartEntityList));
+
+            return Optional.of(new MyPageCartListDto(cartEntities));
         }catch (Exception e){
             throw new AppException(ErrorCode.MY_PAGE_CART_ERROR,ErrorCode.MY_PAGE_CART_ERROR.getMessage());
         }
@@ -83,9 +88,9 @@ public class MyPageService {
     @Transactional
     public List<MyPageOrderHistoryDto> getMyPageOrderHistory(Long userId) {
         try {
-            List<OrderEntity> orderEntities = orderRepository.findByuserId(userId);
+            Optional<OrderEntity> orderEntities = orderRepository.findById(userId);
 
-            if (orderEntities == null || orderEntities.isEmpty()) {
+            if (orderEntities.isEmpty()) {
                 throw new AppException(ErrorCode.NOT_FOUND_ORDER_HISTORY,ErrorCode.NOT_FOUND_ORDER_HISTORY.getMessage());
             }
 

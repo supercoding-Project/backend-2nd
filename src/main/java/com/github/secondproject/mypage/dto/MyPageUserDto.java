@@ -15,6 +15,7 @@ public class MyPageUserDto {
     private String username;
     private String address;
     private String phone;
+    private String gender;
 
     public static MyPageUserDto fromEntities(UserEntity userEntity) {
         return MyPageUserDto.builder()
@@ -23,6 +24,7 @@ public class MyPageUserDto {
                 .username(userEntity.getUsername())
                 .address(userEntity.getAddress())
                 .phone(userEntity.getPhone())
+                .gender(userEntity.getGender())
                 .build();
     }
 }

@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @RestController
@@ -68,6 +69,7 @@ public class MyPageController {
         if (updatedMyPageUser == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "해당 유저의 정보를 찾을 수 없습니다.");
         }
+
         return ResponseEntity.ok(updatedMyPageUser);
     }
 
@@ -101,7 +103,7 @@ public class MyPageController {
 
         List<MyPageOrderHistoryDto> orderHistoryDto = myPageService.getMyPageOrderHistory(userId);
 
-        if (orderHistoryDto == null || orderHistoryDto.isEmpty()) {
+        if (orderHistoryDto.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "구매 내역이 존재하지 않습니다.");
         }
         return ResponseEntity.ok(orderHistoryDto);
