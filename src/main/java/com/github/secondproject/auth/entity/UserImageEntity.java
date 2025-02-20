@@ -22,7 +22,8 @@ public class UserImageEntity {
     @JoinColumn(name = "user_id")
     private UserEntity userEntity;
 
-    public void updateUrl(String url) {
+    public UserImageEntity(UserEntity userEntity, String url) {
+        this.userEntity = userEntity;
         this.url = url;
     }
 }

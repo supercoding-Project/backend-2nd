@@ -22,6 +22,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
@@ -39,9 +40,10 @@ public class UserService {
     private final UserImageRepository userImageRepository;
     private final JwtTokenProvider jwtTokenProvider;
     private final PasswordUtil passwordUtil = new PasswordUtil();
+    private final UserImageService userImageService;
 
     @Transactional
-    public void signUp(SignUpDto signUpDto) throws Exception{
+    public void signUp(SignUpDto signUpDto, MultipartFile image) throws Exception{
         // 이메일 중복 확인
         if (userRepository.findByEmail(signUpDto.getEmail()).isPresent()) {
             throw new AppException(ErrorCode.USERNAME_DUPLICATED, ErrorCode.USERNAME_DUPLICATED.getMessage());
@@ -65,13 +67,11 @@ public class UserService {
                 .createdAt(LocalDateTime.now())
                 .build();
 
-        UserImageEntity userImageEntity = UserImageEntity.builder()
-                .url("/user-images/anonymous.png")
-                .userEntity(userEntity)
-                .build();
+        if (image != null) {
+            userImageService.uploadUserImage(userEntity, image);
+        }
 
         userRepository.save(userEntity);
-        userImageRepository.save(userImageEntity);
     }
 
     @Transactional
