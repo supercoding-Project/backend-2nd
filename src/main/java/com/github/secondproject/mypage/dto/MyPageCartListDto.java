@@ -1,5 +1,6 @@
 package com.github.secondproject.mypage.dto;
 
+import com.github.secondproject.cart.entity.CartEntity;
 import lombok.*;
 
 import java.util.List;

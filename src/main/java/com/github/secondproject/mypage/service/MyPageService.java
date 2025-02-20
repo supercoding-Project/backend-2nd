@@ -2,6 +2,7 @@ package com.github.secondproject.mypage.service;
 
 import com.github.secondproject.auth.entity.UserEntity;
 import com.github.secondproject.auth.repository.UserRepository;
+import com.github.secondproject.cart.entity.CartEntity;
 import com.github.secondproject.mypage.dto.MyPageCartListDto;
 import com.github.secondproject.mypage.dto.MyPageOrderHistoryDto;
 import com.github.secondproject.mypage.dto.MyPageUserDto;
@@ -78,12 +79,12 @@ public class MyPageService {
     @Transactional
     public List<MyPageCartListDto> getMyPageCartList(Long userId) {
         try {
-            List<CartEntity> cartEntities = cartRepository.findByuserId(userId);
+            List<CartEntity> cartEntityList = cartRepository.findByuserId(userId);
 
-            if(cartEntities == null || cartEntities.isEmpty()){
+            if(cartEntityList == null || cartEntityList.isEmpty()){
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND,"장바구니에 상품이 존재하지 않습니다.");
             }
-            return List.of(new MyPageCartListDto(cartEntities));
+            return List.of(new MyPageCartListDto(cartEntityList));
         }catch (Exception e){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"장바구니 조회 중 오류가 발생했습니다.",e);
         }
