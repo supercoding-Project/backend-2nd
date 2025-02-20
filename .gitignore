@@ -2,6 +2,7 @@
 .idea/
 .vscode/
 *.iml
+.gradle/
 
 # 빌드 파일
 target/
