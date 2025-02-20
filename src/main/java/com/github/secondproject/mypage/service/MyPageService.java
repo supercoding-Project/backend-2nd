@@ -3,10 +3,11 @@ package com.github.secondproject.mypage.service;
 import com.github.secondproject.auth.entity.UserEntity;
 import com.github.secondproject.auth.repository.UserRepository;
 import com.github.secondproject.cart.entity.CartEntity;
+import com.github.secondproject.global.exception.AppException;
+import com.github.secondproject.global.exception.ErrorCode;
 import com.github.secondproject.mypage.dto.MyPageCartListDto;
 import com.github.secondproject.mypage.dto.MyPageOrderHistoryDto;
 import com.github.secondproject.mypage.dto.MyPageUserDto;
-import com.github.secondproject.mypage.entity.MyPageUserEntity;
 import com.github.secondproject.mypage.repository.MyPageUserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +24,6 @@ import java.util.List;
 public class MyPageService {
 
     private final UserRepository userRepository;
-    private final MyPageUserRepository myPageUserRepository;
     private final CartRepository cartRepository;
     private final OrderRepository orderRepository;
 
@@ -33,38 +33,27 @@ public class MyPageService {
     public MyPageUserDto getMyPageUserDto(Long userId) {
         //사용자 정보 가져오기
         UserEntity userEntity = userRepository.findById(userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "사용자 정보를 찾을 수 없습니다."));
+                .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND_USERINFO,ErrorCode.NOT_FOUND_USERINFO.getMessage()));
 
-        // MyPageUserEntity 의 aboutMe, profileImage 가져오기
-        MyPageUserEntity myPageUserEntity = myPageUserRepository.findByUserId(userId)
-                .orElse(new MyPageUserEntity());
-
-        if (myPageUserEntity.getAboutMe() == null) {
-            myPageUserEntity.setAboutMe("");
-        }
-        if (myPageUserEntity.getProfileImageUrl() == null || myPageUserEntity.getProfileImageUrl().isEmpty()) {
-            myPageUserEntity.setProfileImageUrl("Images/DefaultImage.png");
+        if(userEntity.getDeletedAt() != null){
+            throw new AppException(ErrorCode.DELETE_USERINFO,ErrorCode.DELETE_USERINFO.getMessage());
         }
 
-        return MyPageUserDto.fromEntities(userEntity, myPageUserEntity);
+        return MyPageUserDto.fromEntities(userEntity);
 
     }
 
     //유저 정보 수정
     @Transactional
     public void updateMyPage(Long userId, MyPageUserDto myPageUserDto) {
-        //마이 페이지 정보 가져오기
-        MyPageUserEntity myPageUserEntity = myPageUserRepository.findById(userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "마이페이지 정보를 찾을 수 없습니다."));
 
         //사용자 정보 가져오기
         UserEntity userEntity = userRepository.findById(userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,"사용자 정보를 찾을 수 없습니다. "));
+                .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND_USERINFO,ErrorCode.NOT_FOUND_USERINFO.getMessage()));
 
-        //AboutMe, ProfileImage 수정
-        myPageUserEntity.setAboutMe(myPageUserDto.getAboutMe());
-        myPageUserEntity.setProfileImageUrl(myPageUserDto.getProfileImageUrl());
-        myPageUserRepository.save(myPageUserEntity);
+        if(userEntity.getDeletedAt() != null){
+            throw new AppException(ErrorCode.DELETE_USERINFO,ErrorCode.DELETE_USERINFO.getMessage());
+        }
 
         //email, username, address, phone 정보 수정
         userEntity.setEmail(myPageUserDto.getEmail());
@@ -82,11 +71,11 @@ public class MyPageService {
             List<CartEntity> cartEntityList = cartRepository.findByuserId(userId);
 
             if(cartEntityList == null || cartEntityList.isEmpty()){
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND,"장바구니에 상품이 존재하지 않습니다.");
+                throw new AppException(ErrorCode.NOT_FOUND_CART_LIST,ErrorCode.NOT_FOUND_CART_LIST.getMessage());
             }
             return List.of(new MyPageCartListDto(cartEntityList));
         }catch (Exception e){
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"장바구니 조회 중 오류가 발생했습니다.",e);
+            throw new AppException(ErrorCode.MY_PAGE_CART_ERROR,ErrorCode.MY_PAGE_CART_ERROR.getMessage());
         }
     }
 
@@ -97,13 +86,13 @@ public class MyPageService {
             List<OrderEntity> orderEntities = orderRepository.findByuserId(userId);
 
             if (orderEntities == null || orderEntities.isEmpty()) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "구매 내역이 존재하지 않습니다.");
+                throw new AppException(ErrorCode.NOT_FOUND_ORDER_HISTORY,ErrorCode.NOT_FOUND_ORDER_HISTORY.getMessage());
             }
 
             return List.of(new MyPageOrderHistoryDto(orderEntities));
 
         }catch (Exception exception){
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"구매 내역 조회 중 오류가 발생했습니다.", exception);
+            throw new AppException(ErrorCode.MY_PAGE_ORDER_ERROR,ErrorCode.MY_PAGE_ORDER_ERROR.getMessage());
         }
     }
 }

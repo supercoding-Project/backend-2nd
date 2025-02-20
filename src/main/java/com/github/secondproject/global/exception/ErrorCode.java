@@ -24,6 +24,14 @@ public enum ErrorCode {
     // 상품 진열 에러코드
     NOT_FOUND_PRODUCT(HttpStatus.NOT_FOUND, "상품을 찾을 수 없습니다."),
 
+    // MyPage 에러코드
+    NOT_FOUND_USERINFO(HttpStatus.NOT_FOUND, "사용자 정보를 찾을 수 없습니다."),
+    DELETE_USERINFO(HttpStatus.NOT_FOUND,"삭제된 사용자 정보입니다."),
+    NOT_FOUND_CART_LIST(HttpStatus.NOT_FOUND,"장바구니에 상품이 존재하지 않습니다."),
+    NOT_FOUND_ORDER_HISTORY(HttpStatus.NOT_FOUND, "구매 내역이 존재하지 않습니다."),
+    MY_PAGE_CART_ERROR(HttpStatus.BAD_REQUEST,"장바구니 조회 중 오류가 발생했습니다."),
+    MY_PAGE_ORDER_ERROR(HttpStatus.BAD_REQUEST,"구매 내역 조회 중 오류가 발생했습니다.")
+
     ;
 
     private final HttpStatus httpStatus;
