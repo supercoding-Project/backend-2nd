@@ -14,6 +14,9 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProductDto {
+
+    @JsonProperty("product_id")
+    private Long productId;
     private String title;  // 도서명
     private String author; // 저자
     private String publisher; // 출판사

@@ -1,6 +1,7 @@
 package com.github.secondproject.product.service;
 
 
+import com.amazonaws.services.s3.AmazonS3Client;
 import com.github.secondproject.auth.entity.UserEntity;
 import com.github.secondproject.auth.entity.UserStatus;
 import com.github.secondproject.auth.repository.UserRepository;
@@ -16,6 +17,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDateTime;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,9 +39,11 @@ public class ProductService {
 
     private final UserRepository userRepository;
 
+    private final AwsFileService awsFileService;
 
     private final ProductRepository productRepository;
 
+    ///
     private UserEntity findUserById(Long userId) {
         // 사용자 id가 존재하지않을 경우 error
         return userRepository.findById(userId)
@@ -44,11 +51,22 @@ public class ProductService {
 
     }
 
+    private ProductEntity findProductById(Long productId) {
+        // 상품 id가 존재하지않을 경우 error
+        return productRepository.findById(productId)
+                .orElseThrow(()-> new AppException(ErrorCode.CHECK_USER_ID,ErrorCode.CHECK_USER_ID.getMessage()));
+
+    }
 
     // 상품 등록
-    public void productRegister(ProductDto productDto , Long userId) throws IOException {
+    @Transactional
+    public void productRegister(ProductDto productDto ,MultipartFile file, Long userId) throws IOException {
 
         UserEntity userEntity = findUserById(userId);
+        /*
+            예외처리 추가 필요
+         */
+        String imageUrl = awsFileService.savePhoto(file, 1L);
 
         Date date = LocalDateTime.now().toDate();
         java.time.LocalDateTime localDateTime = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
@@ -64,10 +82,10 @@ public class ProductService {
                     .publishDate(productDto.getPublishDate())
                     .startedAt(date)
                     .terminatedAt(productDto.getTerminatedAt())
-                    .imageUrl(productDto.getImageUrl())
+                    .imageUrl(imageUrl)
                     .productStatus(productDto.getStatus())
                     .userEntity(userEntity)
-                    .createAt(localDateTime)
+                    .createdAt(localDateTime)
                     .build();
             productRepository.save(productEntity);
         } catch (Exception e) {
@@ -77,19 +95,78 @@ public class ProductService {
     }
 
     // 유저 본인 판매내역 전체 조회
-    public void myProductList(Long userId) {
+    @Transactional
+    public ResponseEntity<?> myProductList(Long userId, Pageable pageable) {
+        Page<ProductEntity> productsPage  = productRepository.findByUserEntity_UserId(userId, pageable);
 
+        List<ProductDto> productDtos = new ArrayList<>();
+        try{
+            for (ProductEntity productEntity : productsPage ) {
+                ProductDto productDto = new ProductDto(
+                        productEntity.getProductId(),
+                        productEntity.getTitle(),
+                        productEntity.getAuthor(),
+                        productEntity.getPublisher(),
+                        productEntity.getOriginalPrice(),
+                        productEntity.getSalePrice(),
+                        productEntity.getDescription(),
+                        productEntity.getStockQuantity(),
+                        productEntity.getPublishDate(),
+                        productEntity.getTerminatedAt(),
+                        productEntity.getProductStatus(),
+                        productEntity.getUserEntity().getUsername(),
+                        productEntity.getImageUrl()
+                );
+                productDtos.add(productDto);
+            }
+            return ResponseEntity.ok(productDtos);
+        }catch (Exception e){
+            throw new AppException(ErrorCode.NOT_ACCEPT,ErrorCode.NOT_ACCEPT.getMessage());
+        }
     }
 
     // 유저 본인 판매내역 상세조회
-    public void myProduct(Long productId,Long userId) {
-
+    public ResponseEntity<?> myProduct(Long productId,Long userId) {
+        ProductEntity productEntity = findProductById(productId);
+        UserEntity userEntity = findUserById(productEntity.getUserEntity().getUserId());
+        try {
+            ProductDto productDto = new ProductDto(
+                    productEntity.getProductId(),
+                    productEntity.getTitle(),
+                    productEntity.getAuthor(),
+                    productEntity.getPublisher(),
+                    productEntity.getOriginalPrice(),
+                    productEntity.getSalePrice(),
+                    productEntity.getDescription(),
+                    productEntity.getStockQuantity(),
+                    productEntity.getPublishDate(),
+                    productEntity.getTerminatedAt(),
+                    productEntity.getProductStatus(),
+                    productEntity.getUserEntity().getUsername(),
+                    productEntity.getImageUrl()
+            );
+            return new ResponseEntity<>(productDto, HttpStatus.OK);
+        }catch (Exception e){
+            throw new AppException(ErrorCode.NOT_ACCEPT,ErrorCode.NOT_ACCEPT.getMessage());
+        }
     }
 
 
     // 유저 자신이 판매중인 상품 재고 수정
     public void productUpdate(MultipartFile file, ProductDto productDto, Long userId) {
+        ProductEntity productEntity = findProductById((productDto.getProductId()));
+        UserEntity userEntity = findUserById(userId);
 
+        // 작성자와 사용자가 일치하지않는 경우 error
+        if(!userEntity.getUserId().equals(productEntity.getUserEntity().getUserId())) {
+            throw new AppException(ErrorCode.NOT_EQUAL_POST_USER,ErrorCode.NOT_EQUAL_POST_USER.getMessage());
+        }
+
+        try{
+            productEntity.setProductEntity(productDto);
+        }catch (Exception e){
+            throw new AppException(ErrorCode.NOT_ACCEPT,ErrorCode.NOT_ACCEPT.getMessage());
+        }
     }
 
     // 판매중인 상품 삭제

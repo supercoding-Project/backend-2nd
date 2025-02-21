@@ -1,6 +1,7 @@
 package com.github.secondproject.product.entity;
 
 import com.github.secondproject.auth.entity.UserEntity;
+import com.github.secondproject.product.dto.ProductDto;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -59,10 +60,25 @@ public class ProductEntity {
     @Column(name = "product_status" ,nullable = false)
     private ProductStatus productStatus;
 
-    @Column(name="create_at")
-    private LocalDateTime createAt;
+    @Column(name="created_at")
+    private LocalDateTime createdAt;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private UserEntity userEntity; // 판매자
+
+    public void setProductEntity(ProductDto productDto) {
+        this.title = productDto.getTitle();
+        this.author = productDto.getAuthor();
+        this.publisher = productDto.getPublisher();
+        this.originalPrice = productDto.getOriginalPrice();
+        this.salePrice = productDto.getSalePrice();
+        this.description = productDto.getDescription();
+        this.stockQuantity = productDto.getStockQuantity();
+        this.publishDate = productDto.getPublishDate();
+        this.terminatedAt = productDto.getTerminatedAt();
+        this.productStatus = productDto.getStatus();
+        this.imageUrl = productDto.getImageUrl();
+    }
+
 }
