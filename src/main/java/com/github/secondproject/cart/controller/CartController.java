@@ -5,6 +5,8 @@ import com.github.secondproject.cart.dto.AddCartDto;
 import com.github.secondproject.cart.dto.UpdateCartDto;
 import com.github.secondproject.cart.service.CartService;
 import com.github.secondproject.global.config.auth.custom.CustomUserDetails;
+import com.github.secondproject.global.exception.AppException;
+import com.github.secondproject.global.exception.ErrorCode;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/cart")
+@RequestMapping("/api/v1/cart")
 @RequiredArgsConstructor
 public class CartController {
     private final CartService cartService;
@@ -27,9 +29,11 @@ public class CartController {
             @AuthenticationPrincipal CustomUserDetails customUserDetails,
             @RequestBody AddCartDto addCartDto
             ) {
+        if (customUserDetails == null) {
+            throw new AppException(ErrorCode.NOT_AUTHORIZED_USER,ErrorCode.NOT_AUTHORIZED_USER.getMessage());
+        }
         UserEntity user = customUserDetails.getUserEntity();
-        cartService.addProductToCart(user,addCartDto);
-        return ResponseEntity.ok().build();
+        return cartService.addProductToCart(user,addCartDto);
     }
 
     // 장바구니 수정하기
@@ -38,6 +42,9 @@ public class CartController {
     public ResponseEntity<?> updateCart(
             @AuthenticationPrincipal CustomUserDetails customUserDetails,
             @RequestBody UpdateCartDto updateCartDto) {
+        if (customUserDetails == null) {
+            throw new AppException(ErrorCode.NOT_AUTHORIZED_USER,ErrorCode.NOT_AUTHORIZED_USER.getMessage());
+        }
         UserEntity user = customUserDetails.getUserEntity();
         cartService.updateCart(user,updateCartDto);
         return ResponseEntity.ok().build();
