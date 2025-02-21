@@ -46,8 +46,7 @@ public class CartController {
             throw new AppException(ErrorCode.NOT_AUTHORIZED_USER,ErrorCode.NOT_AUTHORIZED_USER.getMessage());
         }
         UserEntity user = customUserDetails.getUserEntity();
-        cartService.updateCart(user,updateCartDto);
-        return ResponseEntity.ok().build();
+        return cartService.updateCart(user,updateCartDto);
     }
 
     // 장바구니 상품 삭제
@@ -57,7 +56,10 @@ public class CartController {
             @AuthenticationPrincipal CustomUserDetails customUserDetails,
             @Parameter(name = "product_id",description = "삭제할 상품 ID", example = "1")
             @RequestParam Long productId ){
-        cartService.deleteProductInCart(productId);
-        return ResponseEntity.ok().build();
+        if (customUserDetails == null) {
+            throw new AppException(ErrorCode.NOT_AUTHORIZED_USER,ErrorCode.NOT_AUTHORIZED_USER.getMessage());
+        }
+        UserEntity user = customUserDetails.getUserEntity();
+        return cartService.deleteProductInCart(user,productId);
     }
 }

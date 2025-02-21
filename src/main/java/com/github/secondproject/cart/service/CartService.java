@@ -13,6 +13,7 @@ import com.github.secondproject.global.exception.ErrorCode;
 import com.github.secondproject.product.entity.ProductEntity;
 import com.github.secondproject.product.repository.ProductRepository;
 import lombok.AllArgsConstructor;
+import org.apache.catalina.User;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,7 +42,7 @@ public class CartService {
                                 .user(userEntity)
                                 .build()));
         // 추가할 상품 조회
-        ProductEntity product = productRepository.findById(addCartDto.getProductId())
+        ProductEntity product = productRepository.findById(addCartDto.getProductId().longValue())
                 .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND_PRODUCT, ErrorCode.NOT_FOUND_PRODUCT.getMessage()));
 
         // 장바구니에 동일 상품 있는지 확인
@@ -63,10 +64,51 @@ public class CartService {
         return ResponseEntity.ok(response);
 
     }
+    @Transactional
+    public ResponseEntity<?> updateCart(UserEntity user, UpdateCartDto updateCartDto) {
+        // user 정보 DB에 존재하는지 체크
+        UserEntity userEntity = userRepository.findById(user.getUserId())
+                .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND_USER, ErrorCode.NOT_FOUND_USER.getMessage()));
 
-    public void updateCart(UserEntity user, UpdateCartDto updateCartDto) {
+        // cart 정보 가져오기
+        CartEntity cart = cartRepository.findByUser(userEntity).orElseThrow(() -> new AppException(ErrorCode.CART_NOT_FOUND, ErrorCode.CART_NOT_FOUND.getMessage()));
+
+        // update 할 item 가져오기
+        ProductEntity product = productRepository.findById(updateCartDto.getProductId())
+                .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND_PRODUCT, ErrorCode.NOT_FOUND_PRODUCT.getMessage()));
+
+        // cartItem 가져오기
+        CartItemEntity cartItem = cartItemRepository.findByCartAndProduct(cart,product)
+                .orElseThrow(() -> new AppException(ErrorCode.CART_ITEM_NOT_SELECTED, ErrorCode.CART_ITEM_NOT_SELECTED.getMessage()));
+
+        // 수량 변경하기
+        cartItem.setQuantity(updateCartDto.getQuantity());
+
+        Map<String,String> response = new HashMap<>();
+        response.put("message","상품의 주문 수량이 변경 되었습니다.");
+        return ResponseEntity.ok(response);
     }
 
-    public void deleteProductInCart(Long productId) {
+    public ResponseEntity<?> deleteProductInCart(UserEntity user, Long productId) {
+        // user 정보 DB에 존재하는지 체크
+        UserEntity userEntity = userRepository.findById(user.getUserId())
+                .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND_USER, ErrorCode.NOT_FOUND_USER.getMessage()));
+
+        // cart 정보 가져오기
+        CartEntity cart = cartRepository.findByUser(userEntity).orElseThrow(() -> new AppException(ErrorCode.CART_NOT_FOUND, ErrorCode.CART_NOT_FOUND.getMessage()));
+
+        // update 할 item 가져오기
+        ProductEntity product = productRepository.findById(productId)
+                .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND_PRODUCT, ErrorCode.NOT_FOUND_PRODUCT.getMessage()));
+
+        // cartItem 가져오기
+        CartItemEntity cartItem = cartItemRepository.findByCartAndProduct(cart,product)
+                .orElseThrow(() -> new AppException(ErrorCode.CART_ITEM_NOT_SELECTED, ErrorCode.CART_ITEM_NOT_SELECTED.getMessage()));
+
+        cartItemRepository.delete(cartItem);
+
+        Map<String,String> response = new HashMap<>();
+        response.put("message","상품이 장바구니에서 삭제 되었습니다.");
+        return ResponseEntity.ok(response);
     }
 }

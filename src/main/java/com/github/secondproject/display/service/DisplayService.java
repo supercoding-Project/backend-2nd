@@ -22,7 +22,7 @@ public class DisplayService {
         return productRepository.findByStockQuantityGreaterThan(0,pageable);
     }
 
-    public ProductEntity getProduct(Integer productId) {
+    public ProductEntity getProduct(Long productId) {
         return productRepository.findById(productId).orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND_PRODUCT,ErrorCode.NOT_FOUND_PRODUCT.getMessage()));
     }
 
