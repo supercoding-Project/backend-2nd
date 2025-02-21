@@ -39,3 +39,4 @@ out/
 ## yaml 파일
 application-local.yaml
 src/main/resources/application-local.yaml
+build/
