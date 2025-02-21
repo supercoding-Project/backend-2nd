@@ -4,6 +4,7 @@ import com.github.secondproject.auth.entity.UserEntity;
 import com.github.secondproject.auth.entity.UserImageEntity;
 import com.github.secondproject.auth.repository.UserImageRepository;
 import com.github.secondproject.auth.repository.UserRepository;
+import com.github.secondproject.auth.service.UserImageService;
 import com.github.secondproject.cart.entity.CartEntity;
 import com.github.secondproject.cart.repository.CartRepository;
 import com.github.secondproject.global.exception.AppException;
@@ -19,9 +20,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Optional;
 
 @Slf4j
@@ -31,6 +36,7 @@ public class MyPageService {
 
     private final UserRepository userRepository;
     private final UserImageRepository userImageRepository;
+    private final UserImageService userImageService;
     private final CartRepository cartRepository;
     private final OrderRepository orderRepository;
 
@@ -42,26 +48,25 @@ public class MyPageService {
         UserEntity userEntity = userRepository.findById(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND_USERINFO,ErrorCode.NOT_FOUND_USERINFO.getMessage()));
 
-        // 이미지 가져오기
-        UserImageEntity userImageEntity = userImageRepository.findByUserEntity(userEntity);
-
-        // 기본 이미지 설정 (이미지가 없으면 기본 이미지 URL 사용)
-        if (userImageEntity == null) {
-            userImageEntity = new UserImageEntity();
-            userImageEntity.setUrl("static/uploads/default-profile Image.png");  // 기본 이미지 URL 설정
-        }
-
+        //삭제된 사용자인지 확인하기
         if(userEntity.getDeletedAt() != null){
             throw new AppException(ErrorCode.DELETE_USERINFO,ErrorCode.DELETE_USERINFO.getMessage());
         }
 
-        return MyPageUserDto.fromEntities(userEntity,userImageEntity);
+        // 이미지 가져오기
+       UserImageEntity userImageEntity = Optional.ofNullable(userImageRepository.findByUserEntity(userEntity))
+               .orElseGet(() -> {
+                  UserImageEntity defaultImage = new UserImageEntity();
+                  defaultImage.setUrl("src/main/resources/static/uploads/default-profile Image.png");
+                  return defaultImage;
+               });
 
+        return MyPageUserDto.myPageUserDto(userEntity,userImageEntity);
     }
 
     //유저 정보 수정
     @Transactional
-    public void updateMyPage(Long userId, MyPageUserDto myPageUserDto) {
+    public MyPageUserDto updateMyPage(Long userId, MyPageUserDto myPageUserDto) {
 
         //사용자 정보 가져오기
         UserEntity userEntity = userRepository.findById(userId)
@@ -79,26 +84,38 @@ public class MyPageService {
         userEntity.setGender(myPageUserDto.getGender());
         userRepository.save(userEntity);
 
-        //이미지 가져오기
+        //이미지 수정
         UserImageEntity userImageEntity = userImageRepository.findByUserEntity(userEntity);
+        if(userImageEntity != null){
+            //기존 이미지 삭제
+            String imageUrl = userImageEntity.getUrl().replace("/uploads/profiles/" ,"src/main/resources/static/uploads/profiles/");
+            Path deletePath = Paths.get(imageUrl);
+            try{
+                Files.deleteIfExists(deletePath); //이미지 파일 삭제
+            }catch (IOException e){
+                throw  new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,"프로필 삭제를 실패했습니다.",e); //실패시 오류
+            }
+            userImageRepository.delete(userImageEntity); //리포지토리에서 이미지 삭제
+        }
 
-        userImageEntity.setUrl(myPageUserDto.getUserImage().getUrl());
+        MultipartFile updateUserImage = (MultipartFile) myPageUserDto.getUserImage();
+        userImageService.uploadUserImage(userEntity,updateUserImage);
 
+        UserImageEntity updateUserImageEntities = userImageRepository.findByUserEntity(userEntity);
+        return MyPageUserDto.myPageUserDto(userEntity,updateUserImageEntities);
     }
 
     //장바구니 리스트 조회
     @Transactional
-    public List<MyPageCartListDto> getMyPageCartList(Long userId) {
+    public Optional<MyPageCartListDto> getMyPageCartList(Long userId) {
         try {
-            List<CartEntity> cartEntities = cartRepository.findByUserId(userId);
+            Optional<CartEntity> cartEntities = cartRepository.findByUserId(userId);
 
             if(cartEntities.isEmpty()){
                 throw new AppException(ErrorCode.NOT_FOUND_CART_LIST,ErrorCode.NOT_FOUND_CART_LIST.getMessage());
             }
 
-            return cartRepository.findByUserId(userId)
-                    .map(cartEntity -> Optional.of(new MyPageCartListDto(cartEntity)))
-                    .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND_CART_LIST, ErrorCode.NOT_FOUND_CART_LIST.getMessage()));
+            return Optional.of(new MyPageCartListDto(cartEntities));
         }catch (Exception e){
             throw new AppException(ErrorCode.MY_PAGE_CART_ERROR,ErrorCode.MY_PAGE_CART_ERROR.getMessage());
         }
@@ -106,15 +123,15 @@ public class MyPageService {
 
     //구매 내역 조회
     @Transactional
-    public List<MyPageOrderHistoryDto> getMyPageOrderHistory(Long userId) {
+    public Optional<MyPageOrderHistoryDto> getMyPageOrderHistory(Long userId) {
         try {
-            List<OrderEntity> orderEntities = orderRepository.findAllById(userId);
+            Optional<OrderEntity> orderEntities = orderRepository.findAllById(userId);
 
             if (orderEntities.isEmpty()) {
                 throw new AppException(ErrorCode.NOT_FOUND_ORDER_HISTORY,ErrorCode.NOT_FOUND_ORDER_HISTORY.getMessage());
             }
 
-            return List.of(new MyPageOrderHistoryDto(orderEntities));
+            return Optional.of(new MyPageOrderHistoryDto(orderEntities));
 
         }catch (Exception exception){
             throw new AppException(ErrorCode.MY_PAGE_ORDER_ERROR,ErrorCode.MY_PAGE_ORDER_ERROR.getMessage());

@@ -13,5 +13,5 @@ import java.util.Optional;
 @ToString
 @Builder
 public class MyPageCartListDto {
-    private List<CartEntity> cartList;
+    private Optional<CartEntity> cartList;
 }

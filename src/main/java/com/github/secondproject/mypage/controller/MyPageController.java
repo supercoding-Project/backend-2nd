@@ -61,10 +61,7 @@ public class MyPageController {
         log.info("[PUT]: 유저 정보 수정");
 
         // 수정 정보 업데이트
-        myPageService.updateMyPage(customUserDetails.getUserEntity().getUserId(), myPageUserDto);
-
-        // 수정된 정보 반환
-        MyPageUserDto updatedMyPageUser = myPageService.getMyPageUserDto(userId);
+        MyPageUserDto updatedMyPageUser = myPageService.updateMyPage(customUserDetails.getUserEntity().getUserId(), myPageUserDto);
 
         if (updatedMyPageUser == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "해당 유저의 정보를 찾을 수 없습니다.");
@@ -75,7 +72,7 @@ public class MyPageController {
 
     @Operation(summary = "유저 장바구니 물품 리스트 조회", description = "인증된 userId를 기반으로 장바구니의 물품 리스트를 조회합니다.")
     @GetMapping("/{userId}/cart")
-    public ResponseEntity<List<MyPageCartListDto>> myPageCartList(
+    public ResponseEntity<Optional<MyPageCartListDto>> myPageCartList(
             @AuthenticationPrincipal CustomUserDetails customUserDetails,
             @PathVariable("userId") Long userId) {
         if (customUserDetails == null) {
@@ -83,9 +80,9 @@ public class MyPageController {
         }
         log.info("[GET]: 유저의 장바구니 물품 리스트 조회");
 
-        List<MyPageCartListDto> cartList = myPageService.getMyPageCartList(userId);
+        Optional<MyPageCartListDto> cartList = myPageService.getMyPageCartList(userId);
 
-        if (cartList.isEmpty()) {
+        if (cartList == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "장바구니에 상품이 없습니다.");
         }
         return ResponseEntity.ok(cartList);
@@ -93,7 +90,7 @@ public class MyPageController {
 
     @Operation(summary = "구매 내역 조회", description = "인증된 userId를 기반으로 사용자의 구매 내역을 조회합니다.")
     @GetMapping("/{userId}/orders")
-    public ResponseEntity<List<MyPageOrderHistoryDto>> myPageOrderHistory(
+    public ResponseEntity<Optional<MyPageOrderHistoryDto>> myPageOrderHistory(
             @AuthenticationPrincipal CustomUserDetails customUserDetails,
             @PathVariable("userId") Long userId){
         if (customUserDetails == null) {
@@ -101,7 +98,7 @@ public class MyPageController {
         }
         log.info("[GET]: 구매 목록 조회");
 
-        List<MyPageOrderHistoryDto> orderHistoryDto = myPageService.getMyPageOrderHistory(userId);
+        Optional<MyPageOrderHistoryDto> orderHistoryDto = myPageService.getMyPageOrderHistory(userId);
 
         if (orderHistoryDto.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "구매 내역이 존재하지 않습니다.");

@@ -12,5 +12,5 @@ import java.util.Optional;
 @AllArgsConstructor
 @ToString
 public class MyPageOrderHistoryDto {
-    private List<OrderEntity> orderHistory;
+    private Optional<OrderEntity> orderHistory;
 }
