@@ -29,11 +29,10 @@ public class DisplayService {
     public Page<ProductEntity> getProductsByStatus(Integer state, Pageable pageable) {
         try{
             ProductStatus status = ProductStatus.values()[state];
-            return productRepository.findByStatus(status,pageable);
+            return productRepository.findByProductStatus(status,pageable);
         } catch (Exception e){
             throw new AppException(ErrorCode.NOT_FOUND_STATUS,ErrorCode.NOT_FOUND_STATUS.getMessage());
         }
-
 
     }
 }

@@ -25,6 +25,8 @@ public enum ErrorCode {
     NOT_FOUND_PRODUCT(HttpStatus.NOT_FOUND, "상품을 찾을 수 없습니다."),
     NOT_FOUND_STATUS(HttpStatus.NOT_FOUND, "해당 상태값은 존재하지 않습니다."),
 
+    // 장바구니 에러코드
+    NOT_AUTHORIZED_USER(HttpStatus.UNAUTHORIZED, "인증되지 않은 사용자입니다."),
 
     // 주문 에러코드
     NOT_FOUND_USER(HttpStatus.NOT_FOUND, "해당 유저가 존재하지 않습니다. 유저 정보를 확인해주세요."),

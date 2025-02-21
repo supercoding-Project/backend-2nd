@@ -12,5 +12,5 @@ import org.springframework.stereotype.Repository;
 public interface ProductRepository extends JpaRepository<ProductEntity, Integer> {
     Page<ProductEntity> findByStockQuantityGreaterThan(Integer stockQuantityIsGreaterThan, Pageable pageable);
 
-    Page<ProductEntity> findByStatus(ProductStatus status, Pageable pageable);
+    Page<ProductEntity> findByProductStatus(ProductStatus productStatus, Pageable pageable);
 }
