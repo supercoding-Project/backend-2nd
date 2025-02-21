@@ -1,8 +1,10 @@
 package com.github.secondproject.mypage.dto;
 
+import com.github.secondproject.order.entity.OrderEntity;
 import lombok.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @Getter
 @Setter

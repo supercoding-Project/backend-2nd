@@ -1,6 +1,8 @@
 package com.github.secondproject.mypage.service;
 
 import com.github.secondproject.auth.entity.UserEntity;
+import com.github.secondproject.auth.entity.UserImageEntity;
+import com.github.secondproject.auth.repository.UserImageRepository;
 import com.github.secondproject.auth.repository.UserRepository;
 import com.github.secondproject.cart.entity.CartEntity;
 import com.github.secondproject.cart.repository.CartRepository;
@@ -28,6 +30,7 @@ import java.util.Optional;
 public class MyPageService {
 
     private final UserRepository userRepository;
+    private final UserImageRepository userImageRepository;
     private final CartRepository cartRepository;
     private final OrderRepository orderRepository;
 
@@ -39,11 +42,20 @@ public class MyPageService {
         UserEntity userEntity = userRepository.findById(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND_USERINFO,ErrorCode.NOT_FOUND_USERINFO.getMessage()));
 
+        // 이미지 가져오기
+        UserImageEntity userImageEntity = userImageRepository.findByUserEntity(userEntity);
+
+        // 기본 이미지 설정 (이미지가 없으면 기본 이미지 URL 사용)
+        if (userImageEntity == null) {
+            userImageEntity = new UserImageEntity();
+            userImageEntity.setUrl("static/uploads/default-profile Image.png");  // 기본 이미지 URL 설정
+        }
+
         if(userEntity.getDeletedAt() != null){
             throw new AppException(ErrorCode.DELETE_USERINFO,ErrorCode.DELETE_USERINFO.getMessage());
         }
 
-        return MyPageUserDto.fromEntities(userEntity);
+        return MyPageUserDto.fromEntities(userEntity,userImageEntity);
 
     }
 
@@ -59,12 +71,18 @@ public class MyPageService {
             throw new AppException(ErrorCode.DELETE_USERINFO,ErrorCode.DELETE_USERINFO.getMessage());
         }
 
-        //email, username, address, phone 정보 수정
+        //email, username, address, phone, gender 정보 수정
         userEntity.setEmail(myPageUserDto.getEmail());
         userEntity.setUsername(myPageUserDto.getUsername());
         userEntity.setAddress(myPageUserDto.getAddress());
         userEntity.setPhone(myPageUserDto.getPhone());
+        userEntity.setGender(myPageUserDto.getGender());
         userRepository.save(userEntity);
+
+        //이미지 가져오기
+        UserImageEntity userImageEntity = userImageRepository.findByUserEntity(userEntity);
+
+        userImageEntity.setUrl(myPageUserDto.getUserImage().getUrl());
 
     }
 
@@ -72,13 +90,15 @@ public class MyPageService {
     @Transactional
     public List<MyPageCartListDto> getMyPageCartList(Long userId) {
         try {
-            Optional<CartEntity> cartEntities = cartRepository.findByUserId(userId);
+            List<CartEntity> cartEntities = cartRepository.findByUserId(userId);
 
             if(cartEntities.isEmpty()){
                 throw new AppException(ErrorCode.NOT_FOUND_CART_LIST,ErrorCode.NOT_FOUND_CART_LIST.getMessage());
             }
 
-            return Optional.of(new MyPageCartListDto(cartEntities));
+            return cartRepository.findByUserId(userId)
+                    .map(cartEntity -> Optional.of(new MyPageCartListDto(cartEntity)))
+                    .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND_CART_LIST, ErrorCode.NOT_FOUND_CART_LIST.getMessage()));
         }catch (Exception e){
             throw new AppException(ErrorCode.MY_PAGE_CART_ERROR,ErrorCode.MY_PAGE_CART_ERROR.getMessage());
         }
@@ -88,7 +108,7 @@ public class MyPageService {
     @Transactional
     public List<MyPageOrderHistoryDto> getMyPageOrderHistory(Long userId) {
         try {
-            Optional<OrderEntity> orderEntities = orderRepository.findById(userId);
+            List<OrderEntity> orderEntities = orderRepository.findAllById(userId);
 
             if (orderEntities.isEmpty()) {
                 throw new AppException(ErrorCode.NOT_FOUND_ORDER_HISTORY,ErrorCode.NOT_FOUND_ORDER_HISTORY.getMessage());
