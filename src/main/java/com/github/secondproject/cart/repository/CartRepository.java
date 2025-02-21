@@ -1,6 +1,5 @@
 package com.github.secondproject.cart.repository;
 
-import com.github.secondproject.auth.entity.UserEntity;
 import com.github.secondproject.cart.entity.CartEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -15,5 +14,4 @@ public interface CartRepository extends JpaRepository<CartEntity,Long> {
     @Query("SELECT c FROM CartEntity c WHERE c.user.userId = :userId")
     Optional<CartEntity> findByUserId(@Param("userId") Long userId);
 
-    Long user(UserEntity user);
 }

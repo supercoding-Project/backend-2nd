@@ -12,7 +12,6 @@ import com.github.secondproject.global.exception.ErrorCode;
 import com.github.secondproject.mypage.dto.MyPageCartListDto;
 import com.github.secondproject.mypage.dto.MyPageOrderHistoryDto;
 import com.github.secondproject.mypage.dto.MyPageUserDto;
-import com.github.secondproject.mypage.repository.MyPageUserRepository;
 import com.github.secondproject.order.entity.OrderEntity;
 import com.github.secondproject.order.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
@@ -61,7 +60,7 @@ public class MyPageService {
                   return defaultImage;
                });
 
-        return MyPageUserDto.myPageUserDto(userEntity,userImageEntity);
+        return MyPageUserDto.fromMyPageUser(userEntity,userImageEntity);
     }
 
     //유저 정보 수정
@@ -102,39 +101,34 @@ public class MyPageService {
         userImageService.uploadUserImage(userEntity,updateUserImage);
 
         UserImageEntity updateUserImageEntities = userImageRepository.findByUserEntity(userEntity);
-        return MyPageUserDto.myPageUserDto(userEntity,updateUserImageEntities);
+        if (updateUserImageEntities == null) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "이미지 업데이트에 실패했습니다.");
+        }
+        return MyPageUserDto.fromMyPageUser(userEntity,updateUserImageEntities);
     }
 
     //장바구니 리스트 조회
     @Transactional
     public Optional<MyPageCartListDto> getMyPageCartList(Long userId) {
-        try {
-            Optional<CartEntity> cartEntities = cartRepository.findByUserId(userId);
+        // 사용자 장바구니 조회
+        Optional<CartEntity> cartEntity = cartRepository.findByUserId(userId);
 
-            if(cartEntities.isEmpty()){
-                throw new AppException(ErrorCode.NOT_FOUND_CART_LIST,ErrorCode.NOT_FOUND_CART_LIST.getMessage());
-            }
+        // 장바구니가 존재하지 않으면 예외 처리
+        cartEntity.orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND_CART_LIST, ErrorCode.NOT_FOUND_CART_LIST.getMessage()));
 
-            return Optional.of(new MyPageCartListDto(cartEntities));
-        }catch (Exception e){
-            throw new AppException(ErrorCode.MY_PAGE_CART_ERROR,ErrorCode.MY_PAGE_CART_ERROR.getMessage());
-        }
+        return Optional.of(new MyPageCartListDto(cartEntity));
     }
 
     //구매 내역 조회
     @Transactional
     public Optional<MyPageOrderHistoryDto> getMyPageOrderHistory(Long userId) {
-        try {
-            Optional<OrderEntity> orderEntities = orderRepository.findAllById(userId);
+        //주문 내역 조회
+        Optional<OrderEntity> orderEntities = orderRepository.findById(userId);
 
-            if (orderEntities.isEmpty()) {
-                throw new AppException(ErrorCode.NOT_FOUND_ORDER_HISTORY,ErrorCode.NOT_FOUND_ORDER_HISTORY.getMessage());
-            }
-
-            return Optional.of(new MyPageOrderHistoryDto(orderEntities));
-
-        }catch (Exception exception){
-            throw new AppException(ErrorCode.MY_PAGE_ORDER_ERROR,ErrorCode.MY_PAGE_ORDER_ERROR.getMessage());
+        if (orderEntities.isEmpty()) {
+            throw new AppException(ErrorCode.NOT_FOUND_ORDER_HISTORY,ErrorCode.NOT_FOUND_ORDER_HISTORY.getMessage());
         }
+
+        return Optional.of(new MyPageOrderHistoryDto(orderEntities));
     }
 }

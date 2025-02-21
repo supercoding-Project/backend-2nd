@@ -19,7 +19,7 @@ public class MyPageUserDto {
     private String gender;
     private UserImageEntity userImage;
 
-    public static MyPageUserDto myPageUserDto(UserEntity userEntity, UserImageEntity userImageEntity) {
+    public static MyPageUserDto fromMyPageUser(UserEntity userEntity, UserImageEntity userImageEntity) {
         return MyPageUserDto.builder()
                 .userId(userEntity.getUserId())
                 .email(userEntity.getEmail())
