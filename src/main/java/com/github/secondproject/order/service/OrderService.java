@@ -51,31 +51,31 @@ public class OrderService {
         // 주문 엔티티 생성
         OrderEntity order = new OrderEntity();
         order.setUser(user);
-        order.setTotalPrice(calculateTotalPrice(cartItems));
-        order.setOrderStatus(OrderStatus.PENDING);
-
-        // CartItem -> OrderItem 매핑
-        List<OrderItem> orderItems = cartItems.stream()
-                .map(cartItem -> OrderItem.createOrderItem(
-                        order,
-                        cartItem.getProduct(),
-                        cartItem.getQuantity(),
-                        BigDecimal.valueOf(cartItem.getProduct().getSalePrice())
-                ))
-                .collect(Collectors.toList());
-
-        order.setOrderItems(orderItems);
-        orderRepository.save(order);
+//        order.setTotalPrice(calculateTotalPrice(cartItems));
+//        order.setOrderStatus(OrderStatus.PENDING);
+//
+//        // CartItem -> OrderItem 매핑
+//        List<OrderItem> orderItems = cartItems.stream()
+//                .map(cartItem -> OrderItem.createOrderItem(
+//                        order,
+//                        cartItem.getProduct(),
+//                        cartItem.getQuantity(),
+//                        BigDecimal.valueOf(cartItem.getProduct().getSalePrice())
+//                ))
+//                .collect(Collectors.toList());
+//
+//        order.setOrderItems(orderItems);
+//        orderRepository.save(order);
 
         return order;
 
     }
-
-    private BigDecimal calculateTotalPrice(List<CartItemEntity> cartItems) {
-        return cartItems.stream()
-                .map(item -> BigDecimal.valueOf(item.getProduct().getSalePrice())
-                        .multiply(BigDecimal.valueOf(item.getQuantity())))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-    }
+//
+//    private BigDecimal calculateTotalPrice(List<CartItemEntity> cartItems) {
+//        return cartItems.stream()
+//                .map(item -> BigDecimal.valueOf(item.getProduct().getSalePrice())
+//                        .multiply(BigDecimal.valueOf(item.getQuantity())))
+//                .reduce(BigDecimal.ZERO, BigDecimal::add);
+//    }
 }
 
