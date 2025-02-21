@@ -2,9 +2,18 @@ package com.github.secondproject.product.entity;
 
 import com.github.secondproject.auth.entity.UserEntity;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Entity
 @Table(name = "product")
 public class ProductEntity {
@@ -47,8 +56,11 @@ public class ProductEntity {
     private String imageUrl;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status" ,nullable = false)
-    private ProductStatus status;
+    @Column(name = "product_status" ,nullable = false)
+    private ProductStatus productStatus;
+
+    @Column(name="create_at")
+    private LocalDateTime createAt;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)

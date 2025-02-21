@@ -7,3 +7,13 @@ spring:
     token:
       access-expiration-time: 43200000    # 12시간
       refresh-expiration-time: 604800000
+
+cloud:
+  aws:
+    s3:
+      bucket: ${BUCKET_NAME}
+    stack.auto: false
+    region.static: ap-northeast-2
+    credentials:
+      accessKey: ${ACCESS_KEY}
+      secretKey: ${S3_SECRET_KEY}
