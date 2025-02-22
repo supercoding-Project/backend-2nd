@@ -31,7 +31,17 @@ public enum ErrorCode {
     // 주문 에러코드
     NOT_FOUND_USER(HttpStatus.NOT_FOUND, "해당 유저가 존재하지 않습니다. 유저 정보를 확인해주세요."),
     CART_NOT_FOUND(HttpStatus.NOT_FOUND,"유저의 장바구니를 찾을 수 없습니다."),
-    CART_ITEM_NOT_SELECTED(HttpStatus.NOT_FOUND,"장바구니에서 선택된 상품이 없습니다. 상품을 선택해주세요.")
+    CART_ITEM_NOT_SELECTED(HttpStatus.NOT_FOUND,"장바구니에서 선택된 상품이 없습니다. 상품을 선택해주세요."),
+
+    // 결제 에러코드
+    ORDER_NOT_FOUND(HttpStatus.NOT_FOUND,"주문 내역을 찾을 수 없습니다."),
+    UNAUTHORIZED_USER(HttpStatus.UNAUTHORIZED,"해당 주문에 대한 접근 권한이 없습니다."),
+    INSUFFICIENT_FUNDS(HttpStatus.PAYMENT_REQUIRED,"예산이 부족하여 결제를 진행할 수 없습니다."),
+    STOCK_VALIDATION_FAILED(HttpStatus.NOT_FOUND,"상품 재고 확인 중 오류가 발생했습니다."),
+    INSUFFICIENT_STOCK(HttpStatus.CONFLICT,"선택하신 상품의 재고가 부족합니다."),
+    PAYMENT_PROCESSING_ERROR(HttpStatus.CONFLICT,"결제 처리 중 오류가 발생했습니다.")
+
+
 
 
     ;

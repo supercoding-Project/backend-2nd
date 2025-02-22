@@ -1,16 +1,22 @@
 package com.github.secondproject.payment.entity;
 
-import com.github.secondproject.OrderEntity;
+
 import com.github.secondproject.auth.entity.UserEntity;
+import com.github.secondproject.order.entity.OrderEntity;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicInsert;
 
-import java.math.BigDecimal;
 import java.sql.Timestamp;
 
 @Getter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @DynamicInsert
 @Entity
 @Table(name = "payment")
@@ -28,13 +34,16 @@ public class PaymentEntity {
     private UserEntity user;
 
     @Column(name = "total_price", nullable = false)
-    private BigDecimal totalPrice;
+    private Integer totalPrice;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private PaymentStatus status;
 
     @CreationTimestamp
-    @Column(name = "paymentDateTime", nullable = false)
-    private Timestamp PaymentDateTime;
+    @Column(name = "payment_date_time", nullable = false)
+    private Timestamp paymentDateTime;
+
+    @Column(name = "fail_reason")
+    private String failReason;
 }
