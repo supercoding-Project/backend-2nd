@@ -65,4 +65,8 @@ public class ProductEntity {
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private UserEntity userEntity; // 판매자
+
+    public void setStockQuantity(Integer stockQuantity) {
+        this.stockQuantity = stockQuantity;
+    }
 }
