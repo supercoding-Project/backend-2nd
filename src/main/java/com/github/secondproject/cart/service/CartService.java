@@ -46,19 +46,17 @@ public class CartService {
                 .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND_PRODUCT, ErrorCode.NOT_FOUND_PRODUCT.getMessage()));
 
         // 장바구니에 동일 상품 있는지 확인
-        Optional<CartItemEntity> existingItem = cartItemRepository.findByCartAndProduct(cart, product);
-        if (existingItem.isPresent()){
-            // 이미 존재한다면 수량 증가
-            CartItemEntity cartItem = existingItem.get();
-            cartItem.setQuantity(cartItem.getQuantity() + addCartDto.getQuantity());
-        }
-        else{
-            CartItemEntity cartItem = CartItemEntity.builder()
-                    .cart(cart)
-                    .product(product)
-                    .quantity(addCartDto.getQuantity())
-                    .build();
-        }
+        cartItemRepository.findByCartAndProduct(cart,product)
+                .ifPresentOrElse(
+                        item -> item.setQuantity(item.getQuantity()+addCartDto.getQuantity()),
+                        () -> cartItemRepository.save(
+                                CartItemEntity.builder()
+                                        .cart(cart)
+                                        .product(product)
+                                        .quantity(addCartDto.getQuantity())
+                                .build())
+                );
+
         Map<String,String> response = new HashMap<>();
         response.put("message","상품이 장바구니에 추가 되었습니다.");
         return ResponseEntity.ok(response);
@@ -82,13 +80,18 @@ public class CartService {
                 .orElseThrow(() -> new AppException(ErrorCode.CART_ITEM_NOT_SELECTED, ErrorCode.CART_ITEM_NOT_SELECTED.getMessage()));
 
         // 수량 변경하기
-        cartItem.setQuantity(updateCartDto.getQuantity());
+        try {
+            cartItem.setQuantity(updateCartDto.getQuantity());
+        } catch (RuntimeException e) {
+            throw new AppException(ErrorCode.NOT_ACCEPTABLE_CART, ErrorCode.NOT_ACCEPTABLE_CART.getMessage());
+        }
+
 
         Map<String,String> response = new HashMap<>();
         response.put("message","상품의 주문 수량이 변경 되었습니다.");
         return ResponseEntity.ok(response);
     }
-
+    @Transactional
     public ResponseEntity<?> deleteProductInCart(UserEntity user, Long productId) {
         // user 정보 DB에 존재하는지 체크
         UserEntity userEntity = userRepository.findById(user.getUserId())

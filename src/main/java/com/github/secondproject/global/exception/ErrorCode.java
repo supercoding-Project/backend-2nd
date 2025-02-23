@@ -27,7 +27,7 @@ public enum ErrorCode {
 
     // 장바구니 에러코드
     NOT_AUTHORIZED_USER(HttpStatus.UNAUTHORIZED, "인증되지 않은 사용자입니다."),
-
+    NOT_ACCEPTABLE_CART(HttpStatus.NOT_ACCEPTABLE, "장바구니의 상태 변경에 실패했습니다."),
     // 주문 에러코드
     NOT_FOUND_USER(HttpStatus.NOT_FOUND, "해당 유저가 존재하지 않습니다. 유저 정보를 확인해주세요."),
     CART_NOT_FOUND(HttpStatus.NOT_FOUND,"유저의 장바구니를 찾을 수 없습니다."),
