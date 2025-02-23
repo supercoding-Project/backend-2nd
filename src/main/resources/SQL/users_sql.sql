@@ -19,3 +19,10 @@ create table user_image(
                            url varchar(255) not null,
                            user_id bigint not null
 );
+
+create table refresh_token(
+                              refresh_id bigint primary key auto_increment,
+                              email varchar(100) not null,
+                              refresh_token varchar(255) not null,
+                              expiration varchar(255) not null
+);
