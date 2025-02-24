@@ -1,5 +1,6 @@
 package com.github.secondproject.display.controller;
 
+import com.github.secondproject.display.dto.ProductDisplayDto;
 import com.github.secondproject.display.service.DisplayService;
 import com.github.secondproject.product.entity.ProductEntity;
 import io.swagger.v3.oas.annotations.Operation;
@@ -24,12 +25,12 @@ public class DisplayController {
     // 전체 물품 조회
     @Operation(summary = "전체 상품 조회")
     @GetMapping("/all")
-    public Page<ProductEntity> getAllProduct(Pageable pageable) {
+    public ResponseEntity<Page<ProductDisplayDto>> getAllProduct(Pageable pageable) {
         Pageable sortedPageable = PageRequest.of(
                 pageable.getPageNumber(), pageable.getPageSize(),
                 Sort.by(Sort.Order.desc("startedAt"))
         );
-        return displayService.getAllProducts(sortedPageable);
+        return ResponseEntity.ok(displayService.getAllProducts(sortedPageable));
     }
 
     // 물품 상세 조회
@@ -38,15 +39,15 @@ public class DisplayController {
     public ResponseEntity<?> getProductDetail(
             @Parameter(name = "product_id", description = "상품 ID", example = "1")
             @PathVariable("product_id") Long productId ) {
-        ProductEntity response = displayService.getProduct(productId);
 
+        ProductDisplayDto response = displayService.getProduct(productId);
         return ResponseEntity.ok(response);
     }
 
-    //TODO : 가격 순 정렬
+    //가격 순 정렬
     @Operation(summary = "가격 순서 정렬")
     @GetMapping("/sort")
-    public Page<ProductEntity> sortByPrice(
+    public ResponseEntity<Page<ProductDisplayDto>> sortByPrice(
             @Parameter(name = "by" ,description = "정렬 순서 (0:내림차순, 1: 오름차순)", example = "0")
             @RequestParam Integer by, Pageable pageable) {
 
@@ -55,17 +56,16 @@ public class DisplayController {
                 pageable.getPageNumber(), pageable.getPageSize(),
                 Sort.by(order)
         );
-
-        return displayService.getAllProducts(sortedPageable);
+        return ResponseEntity.ok(displayService.getAllProducts(sortedPageable));
     }
 
-    //TODO : 도서상태 필터링
+    // 도서상태 필터링
     @Operation(summary = "도서 상태 별로 조회하기")
     @GetMapping("/status/{state}")
-    public Page<ProductEntity> getProductByStatus(
+    public ResponseEntity<Page<ProductDisplayDto>> getProductByStatus(
             @Parameter(name = "state", description = "도서 상태 별 조회(최상:0,상급:1,중금:2)", example = "0")
             @PathVariable Integer state, Pageable pageable) {
-        return displayService.getProductsByStatus(state,pageable);
+        return ResponseEntity.ok(displayService.getProductsByStatus(state,pageable));
     }
 
 }
