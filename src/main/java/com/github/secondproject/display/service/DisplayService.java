@@ -62,7 +62,7 @@ public class DisplayService {
                 .terminatedAt(product.getTerminatedAt())
                 .imageUrl(product.getImageUrl())
                 .status(product.getProductStatus())
-                .createdAt(product.getCreateAt())
+                .createdAt(product.getCreatedAt())
                 .userId(product.getUserEntity().getUserId())
                 .build();
     }
