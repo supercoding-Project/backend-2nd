@@ -75,6 +75,7 @@ public class MyPageController {
     public ResponseEntity<?> updateUserProfileImage(
             @AuthenticationPrincipal CustomUserDetails customUserDetails,
             @PathVariable("userId") Long userId,
+
             @RequestParam("image") MultipartFile uploadImage) {
 
         if (customUserDetails == null) {
