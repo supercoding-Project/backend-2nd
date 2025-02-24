@@ -2,17 +2,19 @@ package com.github.secondproject.auth.service;
 
 import com.github.secondproject.auth.dto.LoginDto;
 import com.github.secondproject.auth.dto.SignUpDto;
+import com.github.secondproject.auth.entity.RefreshTokenEntity;
 import com.github.secondproject.auth.entity.Role;
 import com.github.secondproject.auth.entity.UserEntity;
-import com.github.secondproject.auth.entity.UserImageEntity;
 import com.github.secondproject.auth.entity.UserStatus;
-import com.github.secondproject.auth.repository.UserImageRepository;
+import com.github.secondproject.auth.repository.RefreshTokenRepository;
 import com.github.secondproject.auth.repository.UserRepository;
 import com.github.secondproject.global.config.auth.JwtTokenProvider;
+import com.github.secondproject.global.config.auth.filter.JwtAuthenticationFilter;
 import com.github.secondproject.global.exception.AppException;
 import com.github.secondproject.global.exception.ErrorCode;
 import com.github.secondproject.global.util.PasswordUtil;
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,24 +25,21 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
-    private final UserImageRepository userImageRepository;
     private final JwtTokenProvider jwtTokenProvider;
     private final PasswordUtil passwordUtil = new PasswordUtil();
     private final UserImageService userImageService;
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final RefreshTokenRepository refreshTokenRepository;
 
     @Transactional
     public void signUp(SignUpDto signUpDto, MultipartFile image) throws Exception{
@@ -101,9 +100,10 @@ public class UserService {
             log.info("accessToken: {}", accessToken);
             log.info("refreshToken: {}", refreshToken);
 
-
             httpServletResponse.addHeader("Authorization", accessToken);
             httpServletResponse.addCookie(new Cookie("refresh_token", refreshToken));
+
+            addRefresh(loginDto.getEmail(), refreshToken, 10800);
 
             if (userEntity.getRole() != null) {
                 response.put("isAuth", "true");
@@ -130,6 +130,7 @@ public class UserService {
         }
     }
 
+    @Transactional
     public void withdrawalUser(String loginEmail, String requestBodyPassword) throws NoSuchAlgorithmException {
         UserEntity userEntity = userRepository.findByEmail(loginEmail).orElseThrow(
                 () -> new AppException(ErrorCode.USER_EMAIL_NOT_FOUND, ErrorCode.USER_EMAIL_NOT_FOUND.getMessage())
@@ -155,5 +156,65 @@ public class UserService {
             userEntity.setDeletedAt(localDateTime);
             UserEntity deletedUser = userRepository.save(userEntity);
         }
+    }
+
+    @Transactional
+    public ResponseEntity<?> refreshToken(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
+        // 쿠키에 있는 Refresh Token 가져오기
+        String refreshToken = findRefreshTokenCookie(httpServletRequest);
+
+        // 새로운 Access Token 생성
+        String email = jwtTokenProvider.getEmailByToken(refreshToken);
+        UserEntity userEntity = userRepository.findByEmail(email).orElseThrow(
+                () -> new AppException(ErrorCode.NOT_FOUND_USER, ErrorCode.NOT_FOUND_USER.getMessage())
+        );
+
+        String newAccessToken = jwtTokenProvider.createAccessToken(email);
+        String newRefreshToken  = jwtTokenProvider.createRefreshToken(email);
+        Role role = userEntity.getRole();
+
+        jwtTokenProvider.setRole(newAccessToken, role.getType());
+
+        httpServletResponse.addHeader("Authorization", newAccessToken);
+        httpServletResponse.addCookie(new Cookie("refresh_token", newRefreshToken));
+
+        // Refresh Token Entity 변경
+        refreshTokenRepository.deleteByRefreshToken(refreshToken);
+        addRefresh(email, newRefreshToken, 12*60);
+
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    public String findRefreshTokenCookie(HttpServletRequest request) {
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("refresh_token".equals(cookie.getName())) {
+                    return cookie.getValue();
+                }
+
+                if (cookie.getValue() == null) {
+                    throw new AppException(ErrorCode.NOT_FOUND_REFRESH_TOKEN, ErrorCode.NOT_FOUND_REFRESH_TOKEN.getMessage());
+                }
+                return cookie.getValue();
+            }
+
+        } else {
+            throw new AppException(ErrorCode.NOT_FOUND_COOKIE, ErrorCode.NOT_FOUND_COOKIE.getMessage());
+        }
+        return null;
+    }
+
+    protected void addRefresh(String email, String refreshToken, int expiredMinute){
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.MINUTE, expiredMinute);
+        Date date = calendar.getTime();
+
+        RefreshTokenEntity refreshTokenEntity = new RefreshTokenEntity();
+        refreshTokenEntity.setEmail(email);
+        refreshTokenEntity.setRefreshToken(refreshToken);
+        refreshTokenEntity.setExpiration(date.toString());
+
+        refreshTokenRepository.save(refreshTokenEntity);
     }
 }
