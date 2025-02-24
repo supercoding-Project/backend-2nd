@@ -20,11 +20,13 @@ public enum ErrorCode {
     INCORRECT_REFRESH_TOKEN(HttpStatus.CONFLICT, "Refresh Token 이 일치하지 않습니다."),
     INVALID_REFRESH_TOKEN(HttpStatus.BAD_REQUEST, "유효하지 않은 토큰입니다. 다시 로그인 해주세요."),
 
-    // 게시물 에러코드
-    NOT_EQUAL_POST_USER(HttpStatus.BAD_REQUEST, "게시물 수정/삭제 권한이 없습니다."),
+    // 상품 등록 및 조회 에러코드
+    NOT_EQUAL_PRODUCT_USER(HttpStatus.BAD_REQUEST, "상품 수정/삭제 권한이 없습니다."),
     CHECK_USER_ID(HttpStatus.NOT_FOUND, "작성자 정보가 유효하지않습니다."),
-    CHECK_POST_ID(HttpStatus.NOT_FOUND, "게시물이 유효하지않습니다."),
+    CHECK_PRODUCT_ID(HttpStatus.NOT_FOUND, "상품 정보가 유효하지않습니다."),
     NOT_ACCEPT(HttpStatus.NOT_ACCEPTABLE, "해당 페이지에 오류가 발생했습니다."),
+    NOT_SAVE_FILE(HttpStatus.BAD_REQUEST, "파일 저장에 실패했습니다."),
+    NOT_SAVE_TERMINATE(HttpStatus.BAD_REQUEST, "판매 종료일은 현날짜 이후로 설정 가능합니다."),
       
     // 상품 진열 에러코드
     NOT_FOUND_PRODUCT(HttpStatus.NOT_FOUND, "상품을 찾을 수 없습니다."),
