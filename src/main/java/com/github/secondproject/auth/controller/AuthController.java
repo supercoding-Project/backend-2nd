@@ -1,12 +1,14 @@
 package com.github.secondproject.auth.controller;
 import com.github.secondproject.auth.dto.LoginDto;
 import com.github.secondproject.auth.dto.SignUpDto;
-import com.github.secondproject.auth.entity.UserEntity;
 import com.github.secondproject.auth.service.UserService;
 import com.github.secondproject.global.config.auth.custom.CustomUserDetails;
 import com.github.secondproject.global.dto.MsgResponseDto;
+import com.github.secondproject.global.exception.AppException;
 import com.github.secondproject.global.exception.ErrorCode;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -19,10 +21,9 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.security.NoSuchAlgorithmException;
 import java.util.Map;
-import java.util.Objects;
+
 
 @Slf4j
 @RestController
@@ -58,6 +59,7 @@ public class AuthController {
     }
 
     // 회원탈퇴
+    @Operation(summary = "회원탈퇴", description = "회원탈퇴 api 입니다.")
     @PutMapping("/v1/withdrawal")
     public ResponseEntity<?> withdrawalUser(@RequestBody Map<String, String> passwordMap, @AuthenticationPrincipal CustomUserDetails customUserDetails) throws NoSuchAlgorithmException {
         String loginEmail = customUserDetails.getUsername();
@@ -65,5 +67,12 @@ public class AuthController {
 
         userService.withdrawalUser(loginEmail, requestBodyPassword);
         return ResponseEntity.ok(new MsgResponseDto("회원탈퇴가 완료되었습니다.", HttpStatus.OK.value()));
+    }
+
+    // refresh 토큰
+    @PostMapping("/refresh")
+    public ResponseEntity<?> refreshToken(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
+
+        return userService.refreshToken(httpServletRequest, httpServletResponse);
     }
 }

@@ -44,22 +44,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-    private String resolveToken(HttpServletRequest request) {
+    public String resolveToken(HttpServletRequest request) {
         String bearerToken = request.getHeader(AUTHORIZATION_HEADER);
         log.info("Authorization 헤더 값: {}", bearerToken);
-
 
         if (!StringUtils.hasText(bearerToken)) {
             log.warn("Authorization 헤더가 없음");
             return null;
         }
 
-
         if (!bearerToken.toLowerCase().startsWith("bearer ")) {
             log.warn("Bearer 타입이 아님: {}", bearerToken);
             return null;
         }
-
 
         String token = bearerToken.substring(7);
         log.info("추출된 토큰: {}", token);
