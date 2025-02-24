@@ -15,6 +15,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
+
+import java.io.IOException;
 
 @Configuration
 @RequiredArgsConstructor
@@ -49,15 +52,22 @@ public class SecurityConfig {
                         .anyRequest().permitAll()
                 )
                 .logout((logout) -> logout
-                        .logoutUrl("/logout")
-                        .logoutSuccessUrl("/")
+                        .logoutUrl("/api/logout")
                         .addLogoutHandler((request, response, authentication) -> {
-                            HttpSession session = request.getSession();
-                            session.invalidate();
+                            HttpSession session = request.getSession(false);
+                            if (session != null) {
+                                session.invalidate();
+                            }
+                            new SecurityContextLogoutHandler().logout(request, response, authentication);
                         })
-                        .logoutSuccessHandler((request, response, authentication) ->
-                                response.sendRedirect("/"))
-                        .deleteCookies("JESSIONID", "access_token")
+                        .logoutSuccessHandler((request, response, authentication) -> {
+                            try {
+                                response.sendRedirect("/");
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        })
+                        .deleteCookies("JSESSIONID", "access_token")
                 )
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
 
