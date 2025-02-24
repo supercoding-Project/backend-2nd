@@ -55,4 +55,11 @@ public class UserEntity {
 
     @OneToOne(mappedBy = "userEntity", cascade = CascadeType.ALL)
     private UserImageEntity userImageEntity;
+
+    public UserEntity update(String username, UserImageEntity userImageEntity) {
+        this.username = username;
+        this.userImageEntity = userImageEntity;
+
+        return this;
+    }
 }

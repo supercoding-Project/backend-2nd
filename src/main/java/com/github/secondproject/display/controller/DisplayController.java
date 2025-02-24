@@ -39,6 +39,7 @@ public class DisplayController {
     public ResponseEntity<?> getProductDetail(
             @Parameter(name = "product_id", description = "상품 ID", example = "1")
             @PathVariable("product_id") Long productId ) {
+
         ProductDisplayDto response = displayService.getProduct(productId);
         return ResponseEntity.ok(response);
     }

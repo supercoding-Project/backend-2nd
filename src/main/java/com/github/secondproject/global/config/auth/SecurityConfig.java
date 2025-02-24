@@ -19,7 +19,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @RequiredArgsConstructor
 @EnableWebSecurity
-public class SecuirityConfig {
+public class SecurityConfig {
 
     private final JwtTokenProvider jwtTokenProvider;
 
@@ -60,7 +60,6 @@ public class SecuirityConfig {
                         .deleteCookies("JESSIONID", "access_token")
                 )
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
-
 
         return http.build();
     }

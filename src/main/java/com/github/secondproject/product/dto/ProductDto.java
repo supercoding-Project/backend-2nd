@@ -1,5 +1,6 @@
 package com.github.secondproject.product.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.secondproject.product.entity.ProductStatus;
 import lombok.AllArgsConstructor;
@@ -14,6 +15,9 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProductDto {
+
+    @JsonProperty("product_id")
+    private Long productId;
     private String title;  // 도서명
     private String author; // 저자
     private String publisher; // 출판사
