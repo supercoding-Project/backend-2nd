@@ -1,5 +1,6 @@
 package com.github.secondproject.product.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.secondproject.product.entity.ProductStatus;
 import lombok.AllArgsConstructor;

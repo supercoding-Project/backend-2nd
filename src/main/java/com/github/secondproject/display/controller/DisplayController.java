@@ -32,7 +32,7 @@ public class DisplayController {
     @PostMapping("/{product_id}")
     public ResponseEntity<?> getProductDetail(
             @Parameter(name = "product_id", description = "상품 ID", example = "1")
-            @PathVariable("product_id") Integer productId ) {
+            @PathVariable("product_id") Long productId ) {
         ProductEntity response = displayService.getProduct(productId);
 
         return ResponseEntity.ok(response);

@@ -32,7 +32,7 @@ public class OrderService {
     @Transactional
     public OrderEntity createOrder(Long userId, List<Integer> cartItemIds) {
 
-        UserEntity user = userRepository.findById(userId.intValue())
+        UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND_USER,ErrorCode.NOT_FOUND_USER.getMessage()));
 
         CartEntity cart = cartRepository.findByUserId(userId)
