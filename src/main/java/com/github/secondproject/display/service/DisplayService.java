@@ -45,7 +45,6 @@ public class DisplayService {
         } catch (Exception e){
             throw new AppException(ErrorCode.NOT_FOUND_STATUS,ErrorCode.NOT_FOUND_STATUS.getMessage());
         }
-
     }
 
     private ProductDisplayDto toProductDisplayDto(ProductEntity product) {
